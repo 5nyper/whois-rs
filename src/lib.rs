@@ -18,7 +18,7 @@ impl WhoIs {
     pub fn lookup(&mut self) -> String {
         let mut result = String::new();
         let target = self.server.to_owned();
-        let tld = target.split(".").last().expect("nope");
+        let tld = target.split(".").last().expect("Invalid URL?");
         let query = match tld {
             "com" | "net" => "DOMAIN",
             _ => ""
@@ -54,7 +54,7 @@ impl WhoIs {
 
     fn lookup2(&mut self, result: &str) -> String {
         let mut result2 = String::new();
-        let line = &result.lines().find(|i| i.contains("Whois Server:")).expect("not found");
+        let line = &result.lines().find(|i| i.contains("Whois Server:")).unwrap();
         let target = line.split_whitespace().last().unwrap().to_owned();
         let mut client = TcpStream::connect((&*target, 43u16)).expect("Could not connect to server!!");
         match client.write_all(format!("{}\n", self.server).as_bytes()) {
