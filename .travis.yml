@@ -1,0 +1,6 @@
+language: rust
+rust:
+  - nightly
+
+notifications:
+  irc: "irc.zerosec.me#main"
