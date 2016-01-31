@@ -1,7 +1,0 @@
-[package]
-name = "whois"
-version = "0.1.0"
-authors = ["Sinatra <karimellaisy@hotmail.com>"]
-
-[dependencies]
-rustc-serialize = "*"
