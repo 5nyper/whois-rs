@@ -6,7 +6,7 @@ use rustc_serialize::json::Json;
 
 fn main() {
     let data = WhoIs::new("google.com".to_owned()).lookup();
-    let foo = &Json::from_str(&data).unwrap();
+    let foo = &Json::from_str(&data.unwrap()).unwrap();
     let object = foo.as_object().unwrap();
     for (key, value) in object {
         println!("{}: {}", key, match *value {
