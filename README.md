@@ -1,4 +1,4 @@
-# whois-rs
+# whois-rs [![Build status](https://api.travis-ci.org/Vikaton/whois-rs.svg?branch=master)](https://travis-ci.org/Vikaton/whois-rs)
 a whois client library, inspired by https://github.com/hjr265/node-whois
 
 #Example
