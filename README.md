@@ -1,4 +1,4 @@
-# whois
+# whois-rs
 a whois client library, inspired by https://github.com/hjr265/node-whois
 
 #Example
