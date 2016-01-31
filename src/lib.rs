@@ -28,32 +28,35 @@ impl WhoIs {
     ///  If there is another whois server in the whois data then it calls 'parse_whois'
     ///  so it can get the whois data from that
     ///
-    pub fn lookup(&mut self) -> String {
+    pub fn lookup(&mut self) -> Result<String, &'static str> {
         let mut result = String::new();
         let mut server = self.new_whois.to_owned();
         let target = self.server.to_owned();
-        let tld = target.split(".").last().expect("Invalid URL?");
+        let tld = match target.split(".").last() {
+            Some(tld) => tld,
+            None => return Err("Invalid URL?")
+        };
         if self.follow == 0 {
             self.query = match tld {
                 "com" | "net" => "DOMAIN ".into(),
                 _ => "".into()
             };
-            server = self.get_server(&tld);
+            server = self.get_server(&tld).unwrap();
         }
         let mut client = TcpStream::connect((&*server, 43u16)).expect("Could not connect to server!!");
         match client.write_all(format!("{}{}\n", self.query, target).as_bytes()) {
             Ok(_) => (),
-            Err(e) => panic!("Could not write to client {}", e)
+            Err(_) => return Err("Could not write to client {}")
         }
         client.read_to_string(&mut result).unwrap();
         if result.contains("Whois Server:") {
             self.query = "".into();
             self.follow += 1;                                             // If there is another Whois Server, take that server and pass it to
-            return self.parse_whois(&*result)                             // pass it to parse_whois
+            return Ok(self.parse_whois(&*result))                             // pass it to parse_whois
         }
         else {
             let clean = result.replace("http:", "").replace("https:",""); // I'm splitting via ':' so the urls needs to be omitted
-            return self.parse_data(clean)
+            return Ok(self.parse_data(clean))
         }
     }
     fn parse_data(&self, result: String) -> String {
@@ -77,19 +80,19 @@ impl WhoIs {
         let line = &result.lines().find(|i| i.contains("Whois Server:")).unwrap();
         let target = line.split_whitespace().last().unwrap().to_owned();
         self.new_whois = target;
-        self.lookup()
+        self.lookup().unwrap()
     }
 
-    fn get_server(&self, target: &str) -> String {
+    fn get_server(&self, target: &str) -> Result<String, &'static str> {
         let mut result = String::new();
         let mut client = TcpStream::connect("whois.iana.org:43").expect("Could not connect to server!");
         match client.write_all(format!("{}\n", target).as_bytes()) {
             Ok(_) => (),
-            Err(e) => panic!("Could not write to client {}", e)
+            Err(_) => return Err("Could not write to client")
         }
         client.read_to_string(&mut result).unwrap();
         let line = &result.lines().find(|i| i.starts_with("whois:")).unwrap();
         let foo = line.split_whitespace().last().unwrap().to_owned();
-        foo
+        Ok(foo)
     }
 }
