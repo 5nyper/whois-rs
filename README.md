@@ -3,6 +3,13 @@ a whois client library, inspired by https://github.com/hjr265/node-whois
 
 #Example
 
+###Cargo.toml
+```toml
+[dependencies]
+whois = "0.1.0"
+```
+
+###main.rs
 ```rust
 extern crate whois;
 extern crate rustc_serialize;
