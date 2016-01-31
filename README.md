@@ -21,3 +21,7 @@ fn main() {
         });
     }
 }
+```
+
+#TODO
+- [ ] Error-Handling and WHOIS server following
