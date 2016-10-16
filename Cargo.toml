@@ -5,3 +5,4 @@ authors = ["vikaton <root@stackin.money>"]
 
 [dependencies]
 rustc-serialize = "*"
+error-chain = "0.5"
