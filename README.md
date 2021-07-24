@@ -1,15 +1,18 @@
 # whois-rs [![Build status](https://api.travis-ci.org/Vikaton/whois-rs.svg?branch=master)](https://travis-ci.org/Vikaton/whois-rs)
-a whois client library, inspired by https://github.com/hjr265/node-whois
 
-#Example
+A whois client library, inspired by https://github.com/hjr265/node-whois
 
-###Cargo.toml
+## Example
+
+### Cargo.toml
+
 ```toml
 [dependencies]
 whois = "0.1.0"
 ```
 
-###main.rs
+### main.rs
+
 ```rust
 extern crate whois;
 extern crate rustc_serialize;
@@ -30,5 +33,6 @@ fn main() {
 }
 ```
 
-#TODO
+## TODO
+
 - [ ] Error-Handling and WHOIS server following
