@@ -99,7 +99,6 @@ impl<'a> WhoIs<'a> {
                    .chain_err(|| "Could not write to client"));
 
         try!(client.read_to_string(&mut result).chain_err(|| "Failed to read result to string"));
-        // println!("{:?}", result);
         let line = &result.lines().find(|i| i.starts_with("whois:")).expect("Couldnt get wh");
         let foo = line.split_whitespace().last().unwrap().to_owned();
         Ok(foo)
