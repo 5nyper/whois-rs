@@ -28,13 +28,11 @@ impl<'a> WhoIs<'a> {
             query: String::new(),
         }
     }
+    ///  This function will get whois server from the `get_server` function, decide the appropriate
+    ///  query for the server and parse the whois data into JSON by calling `parse_data()`.
     ///
-    ///
-    ///  This function will get whois server from the `get_server` function decide the appropriate
-    ///  query for the server and parse the whois data into JSON by calling parse_data()
-    ///  If there is another whois server in the whois data then it calls 'parse_whois'
-    ///  so it can get the whois data from that
-    ///
+    ///  If there is another whois server in the whois data then it calls `parse_whois`,
+    ///  so it can get the whois data from that.
     pub fn lookup(&mut self) -> Result<String> {
         let mut result = String::new();
         let mut server = self.new_whois.to_owned();
@@ -61,10 +59,10 @@ impl<'a> WhoIs<'a> {
 
         if result.contains("Whois Server:") {
             self.query = "".into();
-            self.follow += 1;                                             // If there is another Whois Server, take that server and pass it to
-            Ok(self.parse_whois(&*result))                             // pass it to parse_whois
+            self.follow += 1; // If there is another Whois Server, take that server and pass it to.
+            Ok(self.parse_whois(&*result)) // Pass it to parse_whois.
         } else {
-            let clean = result.replace("http:", "").replace("https:", ""); // I'm splitting via ':' so the urls needs to be omitted
+            let clean = result.replace("http:", "").replace("https:", ""); // I'm splitting via ':' so the urls' protocols needs to be omitted.
             self.parse_data(clean)
         }
     }
@@ -81,10 +79,8 @@ impl<'a> WhoIs<'a> {
         }
         json::encode(&data).chain_err(|| "Could not encode data as json")
     }
-    ///
-    /// This function calls lookup() again if there is a another whois server
-    ///
-    ///
+
+    /// This function calls `lookup()` again if there is a another whois server.
     fn parse_whois(&mut self, result: &str) -> String {
         let line = &result.lines()
                           .find(|i| i.contains("Whois Server:"))
@@ -103,7 +99,6 @@ impl<'a> WhoIs<'a> {
                    .chain_err(|| "Could not write to client"));
 
         try!(client.read_to_string(&mut result).chain_err(|| "Failed to read result to string"));
-        // println!("{:?}", result);
         let line = &result.lines().find(|i| i.starts_with("whois:")).expect("Couldnt get wh");
         let foo = line.split_whitespace().last().unwrap().to_owned();
         Ok(foo)
