@@ -1,8 +1,8 @@
-extern crate whois;
 extern crate rustc_serialize;
+extern crate whois;
 
-use whois::WhoIs;
 use rustc_serialize::json::Json;
+use whois::WhoIs;
 
 fn main() {
     let data = WhoIs::new("google.com").lookup();

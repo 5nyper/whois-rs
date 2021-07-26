@@ -4,30 +4,31 @@ extern crate error_chain;
 
 extern crate rustc_serialize;
 
-use std::net::TcpStream;
-use std::io::prelude::*;
-use std::collections::HashMap;
 use rustc_serialize::json;
+use std::collections::HashMap;
+use std::io::prelude::*;
+use std::net::TcpStream;
 
 pub mod errors;
 use errors::*;
 
 pub struct WhoIs<'a> {
-    server: &'a str,
+    target: &'a str,
     follow: isize,
     new_whois: String,
     query: String,
 }
 
 impl<'a> WhoIs<'a> {
-    pub fn new(x: &'a str) -> WhoIs<'a> {
+    pub fn new(target: &'a str) -> WhoIs<'a> {
         WhoIs {
-            server: x,
+            target,
             follow: 0,
             new_whois: String::new(),
             query: String::new(),
         }
     }
+
     ///  This function will get whois server from the `get_server` function, decide the appropriate
     ///  query for the server and parse the whois data into JSON by calling `parse_data()`.
     ///
@@ -36,7 +37,7 @@ impl<'a> WhoIs<'a> {
     pub fn lookup(&mut self) -> Result<String> {
         let mut result = String::new();
         let mut server = self.new_whois.to_owned();
-        let target = self.server.to_owned();
+        let target = self.target.to_owned();
         let tld = match target.split(".").last() {
             Some(tld) => tld,
             None => return Err("Invalid URL?".into()),
@@ -46,15 +47,19 @@ impl<'a> WhoIs<'a> {
                 "com" | "net" => "DOMAIN ".into(),
                 _ => "".into(),
             };
-            server = self.get_server(&tld).expect(&format!("Failed to get server for {}", tld));
+            server = self
+                .get_server(&tld)
+                .expect(&format!("Failed to get server for {}", tld));
         }
-        let mut client = TcpStream::connect((&*server, 43u16))
-                            .chain_err(|| "Could not connect to server!!")?;
+        let mut client =
+            TcpStream::connect((&*server, 43u16)).chain_err(|| "Could not connect to server!!")?;
 
-        client.write_all(format!("{}{}\n", self.query, target).as_bytes())
+        client
+            .write_all(format!("{}{}\n", self.query, target).as_bytes())
             .chain_err(|| "Could not write to client {}")?;
 
-        client.read_to_string(&mut result)
+        client
+            .read_to_string(&mut result)
             .chain_err(|| "Failed to read to string")?;
 
         if result.contains("Whois Server:") {
@@ -66,6 +71,7 @@ impl<'a> WhoIs<'a> {
             self.parse_data(clean)
         }
     }
+
     fn parse_data(&self, result: String) -> Result<String> {
         let mut data = HashMap::new();
         for c in result.lines() {
@@ -82,9 +88,10 @@ impl<'a> WhoIs<'a> {
 
     /// This function calls `lookup()` again if there is a another whois server.
     fn parse_whois(&mut self, result: &str) -> String {
-        let line = &result.lines()
-                          .find(|i| i.contains("Whois Server:"))
-                          .expect("Could not find wh");
+        let line = &result
+            .lines()
+            .find(|i| i.contains("Whois Server:"))
+            .expect("Could not find wh");
         let target = line.split_whitespace().last().unwrap().to_owned();
         self.new_whois = target;
         self.lookup().expect("Failed lookup in parse_whois")
@@ -92,15 +99,21 @@ impl<'a> WhoIs<'a> {
 
     fn get_server(&self, target: &str) -> Result<String> {
         let mut result = String::new();
-        let mut client = TcpStream::connect("whois.iana.org:43")
-                                .chain_err(|| "Could not connect to server!")?;
+        let mut client =
+            TcpStream::connect("whois.iana.org:43").chain_err(|| "Could not connect to server!")?;
 
-        client.write_all(format!("{}\n", target).as_bytes())
+        client
+            .write_all(format!("{}\n", target).as_bytes())
             .chain_err(|| "Could not write to client")?;
 
-        client.read_to_string(&mut result).chain_err(|| "Failed to read result to string")?;
-        let line = &result.lines().find(|i| i.starts_with("whois:")).expect("Couldnt get wh");
-        let foo = line.split_whitespace().last().unwrap().to_owned();
-        Ok(foo)
+        client
+            .read_to_string(&mut result)
+            .chain_err(|| "Failed to read result to string")?;
+        let line = &result
+            .lines()
+            .find(|i| i.starts_with("whois:"))
+            .expect("Couldnt get wh");
+        let server = line.split_whitespace().last().unwrap().to_owned();
+        Ok(server)
     }
 }
