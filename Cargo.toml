@@ -2,7 +2,12 @@
 name = "whois"
 version = "0.1.0"
 authors = ["vikaton <root@stackin.money>"]
+description = "A whois client library, inspired by https://github.com/hjr265/node-whois"
+license = "MIT"
+keywords = ["whois"]
+categories = ["network-programming"]
+repository = "https://github.com/5ynatra/whois-rs"
 
 [dependencies]
-rustc-serialize = "*"
-error-chain = "0.5"
+rustc-serialize = "0.3"
+error-chain = "0.12"
