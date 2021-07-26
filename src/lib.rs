@@ -48,14 +48,14 @@ impl<'a> WhoIs<'a> {
             };
             server = self.get_server(&tld).expect(&format!("Failed to get server for {}", tld));
         }
-        let mut client = try!(TcpStream::connect((&*server, 43u16))
-                                  .chain_err(|| "Could not connect to server!!"));
+        let mut client = TcpStream::connect((&*server, 43u16))
+                            .chain_err(|| "Could not connect to server!!")?;
 
-        try!(client.write_all(format!("{}{}\n", self.query, target).as_bytes())
-                   .chain_err(|| "Could not write to client {}"));
+        client.write_all(format!("{}{}\n", self.query, target).as_bytes())
+            .chain_err(|| "Could not write to client {}")?;
 
-        try!(client.read_to_string(&mut result)
-                   .chain_err(|| "Failed to read to string"));
+        client.read_to_string(&mut result)
+            .chain_err(|| "Failed to read to string")?;
 
         if result.contains("Whois Server:") {
             self.query = "".into();
@@ -92,13 +92,13 @@ impl<'a> WhoIs<'a> {
 
     fn get_server(&self, target: &str) -> Result<String> {
         let mut result = String::new();
-        let mut client = try!(TcpStream::connect("whois.iana.org:43")
-                                  .chain_err(|| "Could not connect to server!"));
+        let mut client = TcpStream::connect("whois.iana.org:43")
+                                .chain_err(|| "Could not connect to server!")?;
 
-        try!(client.write_all(format!("{}\n", target).as_bytes())
-                   .chain_err(|| "Could not write to client"));
+        client.write_all(format!("{}\n", target).as_bytes())
+            .chain_err(|| "Could not write to client")?;
 
-        try!(client.read_to_string(&mut result).chain_err(|| "Failed to read result to string"));
+        client.read_to_string(&mut result).chain_err(|| "Failed to read result to string")?;
         let line = &result.lines().find(|i| i.starts_with("whois:")).expect("Couldnt get wh");
         let foo = line.split_whitespace().last().unwrap().to_owned();
         Ok(foo)
